@@ -2,7 +2,7 @@
 {
   "name": "hubot-ninetan",
   "version": "1.0.0",
-  "description": "Get .",
+  "description": "Get short-term weather forecast from ninetan.",
   "main": "index.coffee",
   "repository": {
     "type": "git",
