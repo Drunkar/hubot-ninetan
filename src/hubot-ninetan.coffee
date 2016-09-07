@@ -126,14 +126,14 @@ module.exports = (robot) ->
         # it will rain
         when true
           if isRaining(robot, "tokyo") in [0, null]
-            message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINTAN_URL_TOKYO
+            message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINETAN_URL_TOKYO
             startsToRain(robot, "tokyo")
           break;
 
         # it will stop rain, or sunny
         when false
           if isRaining(robot, "tokyo") in [1, null]
-            message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINTAN_URL_TOKYO
+            message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINETAN_URL_TOKYO
             stopRaining(robot, "tokyo")
         else
           message = "東京のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_TOKYO_KOMABA
@@ -158,14 +158,14 @@ module.exports = (robot) ->
         # it will rain
         when true
           if isRaining(robot, "kyoto") == 0
-            message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINTAN_URL_KYOTO
+            message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINETAN_URL_KYOTO
             startsToRain(robot, "kyoto")
           break;
 
         # it will stop rain, or sunny
         when false
           if isRaining(robot, "kyoto") == 1
-            message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINTAN_URL_KYOTO
+            message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINETAN_URL_KYOTO
             stopRaining(robot, "kyoto")
 
         else
