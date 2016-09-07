@@ -39,17 +39,17 @@ itWillRain = (ninetan_databody) ->
         return false
 
 
-isRaining = (area="tokyo") ->
+isRaining = (robot, area="tokyo") ->
   switch area
     when "tokyo"
       return robot.brain.get(NINETAN_KOMABA_BRAIN_KEY)
     when "kyoto"
       return robot.brain.get(NINETAN_KRP_BRAIN_KEY)
     else
-      return null
+      return -1
 
 
-startsToRain = (area="tokyo") ->
+startsToRain = (robot, area="tokyo") ->
   switch area
     when "tokyo"
       robot.brain.set(NINETAN_KOMABA_BRAIN_KEY, 1)
@@ -57,7 +57,7 @@ startsToRain = (area="tokyo") ->
       robot.brain.set(NINETAN_KRP_BRAIN_KEY, 1)
 
 
-stopRaining = (area="tokyo") ->
+stopRaining = (robot, area="tokyo") ->
   switch area
     when "tokyo"
       robot.brain.set(NINETAN_KOMABA_BRAIN_KEY, 0)
@@ -125,16 +125,16 @@ module.exports = (robot) ->
 
         # it will rain
         when true
-          if isRaining("tokyo") == 0
+          if isRaining(robot, "tokyo") in [0, null]
             message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINTAN_URL_TOKYO
-            startsToRain("tokyo")
+            startsToRain(robot, "tokyo")
           break;
 
         # it will stop rain, or sunny
         when false
-          if isRaining("tokyo") == 1
+          if isRaining(robot, "tokyo") in [1, null]
             message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINTAN_URL_TOKYO
-            stopRaining("tokyo")
+            stopRaining(robot, "tokyo")
         else
           message = "東京のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_TOKYO_KOMABA
 
@@ -157,16 +157,16 @@ module.exports = (robot) ->
 
         # it will rain
         when true
-          if isRaining("kyoto") == 0
+          if isRaining(robot, "kyoto") == 0
             message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINTAN_URL_KYOTO
-            startsToRain("kyoto")
+            startsToRain(robot, "kyoto")
           break;
 
         # it will stop rain, or sunny
         when false
-          if isRaining("kyoto") == 1
+          if isRaining(robot, "kyoto") == 1
             message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINTAN_URL_KYOTO
-            stopRaining("kyoto")
+            stopRaining(robot, "kyoto")
 
         else
           message = "京都のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_KYOTO_KRP
