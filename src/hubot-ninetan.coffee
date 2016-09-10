@@ -121,6 +121,7 @@ module.exports = (robot) ->
         robot.logger.error "process.env.HUBOT_NINETAN_ROOM_ID is not defined"
         return
 
+      message = ""
       robot.http(NINETAN_DATA_TOKYO_KOMABA).get() (err, res, body) ->
         if err
           message = "東京のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_TOKYO_KOMABA
@@ -171,7 +172,6 @@ module.exports = (robot) ->
             if isRaining(robot, "kyoto") in [1, null]
               message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINETAN_URL_KYOTO
               stopRaining(robot, "kyoto")
-
           else
             message = "京都のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_KYOTO_KRP
 
