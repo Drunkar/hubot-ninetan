@@ -2,7 +2,8 @@
 #   Get short-term weather forecast from ninetan.
 #
 # Dependencies:
-#   cron
+#   HUBOT_NINETAN_ROOM_ID: slack room id.
+#   HUBOT_NINETAN_CRON_AREAS: ["tokyo", "kyoto"]
 #
 # Configuration:
 #   None
@@ -18,6 +19,7 @@ cronJob = require('cron').CronJob
 
 config =
   roomId: process.env.HUBOT_NINETAN_ROOM_ID
+  cronAreas: JSON.parse(process.env.HUBOT_NINETAN_CRON_AREAS ? '[]')
 
 NINETAN_DATA_TOKYO_KOMABA = "http://sx9.jp/weather/tokyo-komaba.js"
 NINETAN_DATA_KYOTO_KRP = "http://sx9.jp/weather/kyoto-krp.js"
@@ -111,66 +113,68 @@ module.exports = (robot) ->
   robot.respond /((ninetan|ないんたん) (.+))/i, (msg) ->
     checkNineTan(msg, msg.match[3].toLowerCase())
 
-  # get tokyo(KOMABA) forecast
-  # *(sec) *(min) *(hour) *(day) *(month) *(day of the week)
-  new cronJob("30 */10 * * * 1,2,3,4,5", () ->
-    unless config.roomId?
-      robot.logger.error "process.env.HUBOT_NINETAN_ROOM_ID is not defined"
-      return
+  if "tokyo" in config.cronAreas
+    # get tokyo(KOMABA) forecast
+    # *(sec) *(min) *(hour) *(day) *(month) *(day of the week)
+    new cronJob("30 */10 * * * *", () ->
+      unless config.roomId?
+        robot.logger.error "process.env.HUBOT_NINETAN_ROOM_ID is not defined"
+        return
 
-    robot.http(NINETAN_DATA_TOKYO_KOMABA).get() (err, res, body) ->
-      if err
-        message = area + "のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_TOKYO_KOMABA
-      switch itWillRain(body)
-
-        # it will rain
-        when true
-          if isRaining(robot, "tokyo") in [0, null]
-            message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINETAN_URL_TOKYO
-            startsToRain(robot, "tokyo")
-          break;
-
-        # it will stop rain, or sunny
-        when false
-          if isRaining(robot, "tokyo") in [1, null]
-            message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINETAN_URL_TOKYO
-            stopRaining(robot, "tokyo")
-        else
+      robot.http(NINETAN_DATA_TOKYO_KOMABA).get() (err, res, body) ->
+        if err
           message = "東京のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_TOKYO_KOMABA
+        switch itWillRain(body)
 
-      envelope = room: config.roomId
-      robot.send envelope, message
-  ).start()
+          # it will rain
+          when true
+            if isRaining(robot, "tokyo") in [0, null]
+              message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINETAN_URL_TOKYO
+              startsToRain(robot, "tokyo")
+            break;
 
-  # get kyoto(KRP) forecast
-  # *(sec) *(min) *(hour) *(day) *(month) *(day of the week)
-  new cronJob("30 */10 * * * 1,2,3,4,5", () ->
-    unless config.roomId?
-      robot.logger.error "process.env.HUBOT_NINETAN_ROOM_ID is not defined"
-      return
+          # it will stop rain, or sunny
+          when false
+            if isRaining(robot, "tokyo") in [1, null]
+              message = "東京の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINETAN_URL_TOKYO
+              stopRaining(robot, "tokyo")
+          else
+            message = "東京のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_TOKYO_KOMABA
 
-    message = ""
-    robot.http(NINETAN_DATA_KYOTO_KRP).get() (err, res, body) ->
-      if err
-        message = area + "のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_KYOTO_KRP
-      switch itWillRain(body)
+        envelope = room: config.roomId
+        robot.send envelope, message
+    ).start()
 
-        # it will rain
-        when true
-          if isRaining(robot, "kyoto") in [0, null]
-            message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINETAN_URL_KYOTO
-            startsToRain(robot, "kyoto")
-          break;
+  if "kyoto" in config.cronAreas
+    # get kyoto(KRP) forecast
+    # *(sec) *(min) *(hour) *(day) *(month) *(day of the week)
+    new cronJob("30 */10 * * * *", () ->
+      unless config.roomId?
+        robot.logger.error "process.env.HUBOT_NINETAN_ROOM_ID is not defined"
+        return
 
-        # it will stop rain, or sunny
-        when false
-          if isRaining(robot, "kyoto") in [1, null]
-            message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINETAN_URL_KYOTO
-            stopRaining(robot, "kyoto")
-
-        else
+      message = ""
+      robot.http(NINETAN_DATA_KYOTO_KRP).get() (err, res, body) ->
+        if err
           message = "京都のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_KYOTO_KRP
+        switch itWillRain(body)
 
-      envelope = room: config.roomId
-      robot.send envelope, message
-  ).start()
+          # it will rain
+          when true
+            if isRaining(robot, "kyoto") in [0, null]
+              message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n1時間後に雨が降るなのっ\n" + NINETAN_URL_KYOTO
+              startsToRain(robot, "kyoto")
+            break;
+
+          # it will stop rain, or sunny
+          when false
+            if isRaining(robot, "kyoto") in [1, null]
+              message = "京都の1時間後の降水確率: " + getPercentage(body) + "% なのっ\n天気は回復だねっ\n" + NINETAN_URL_KYOTO
+              stopRaining(robot, "kyoto")
+
+          else
+            message = "京都のデータがうまく取れなかったなのっ\n" + NINETAN_DATA_KYOTO_KRP
+
+        envelope = room: config.roomId
+        robot.send envelope, message
+    ).start()
